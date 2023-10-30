@@ -1,6 +1,3 @@
-# Author: Rodolfo Ferro 
-# Mail: ferro@cimat.mx
-# Script: Compute the Convex Hull of a set of points using the Graham Scan
 
 import sys
 import numpy as np
@@ -12,13 +9,20 @@ def CCW(p1, p2, p3):
 		return True
 	return False
 
-# Main function:
-def GiftWrapping(S):
+
+def JarvisMarch(S):
 	plt.figure()  # Define figure
 	index = 0
+	S = list(S)
+	S.sort(key = lambda x: x[1])	# Sort the set of points
+
+	S = np.array(S)
+
+	print("\nSorted List of Points: ")
+	print(S, end='\n\n')
 	n = len(S)
 	P = [None] * n
-	l = np.where(S[:,0] == np.min(S[:,0]))
+	l = np.where(S[:,1] == np.min(S[:,1]))
 	pointOnHull = S[l[0][0]]
 	i = 0
 	while True:
@@ -35,7 +39,7 @@ def GiftWrapping(S):
 		plt.plot(S[:,0],S[:,1],".r")              # Plot points
 		plt.axis('off')         # No axis
 		plt.show(block=False)   # Close plot
-		plt.pause(0.0000001)    # Mini-pause before closing plot
+		plt.pause(0.1)    # Mini-pause before closing plot
 		index += 1
 		if endpoint[0] == P[0][0] and endpoint[1] == P[0][1]:
 			break
@@ -51,7 +55,7 @@ def GiftWrapping(S):
 	plt.plot(S[:,0],S[:,1],".r")
 	plt.axis('off')
 	plt.show(block=False)
-	plt.pause(0.0000001)
+	plt.pause(0.1)
 	return P
 
 def main():
@@ -61,13 +65,19 @@ def main():
 		N = int(input("Introduce N: "))
   
 	# By default we build a random set of N points with coordinates in [0,300)x[0,300):
-	P = np.array([(np.random.randint(0,300),np.random.randint(0,300)) for i in range(N)])
-	L = GiftWrapping(P)
+	Points = np.array([(np.random.randint(-300,300),np.random.randint(-300,300)) for i in range(N)])
+	for p in Points:
+		print(p)
+
+	Final_Hull = JarvisMarch(Points)
+
+	print(Final_Hull)
+	print(Final_Hull[:,1])
 	
 	# We use the predefined figure
-	plt.plot(L[:,0],L[:,1], 'b-', picker=5)
-	plt.plot([L[-1,0],L[0,0]],[L[-1,1],L[0,1]], 'b-', picker=5)
-	plt.plot(P[:,0],P[:,1],".r")
+	plt.plot(Final_Hull[:,0],Final_Hull[:,1], 'b-', picker=5)
+	plt.plot([Final_Hull[-1,0],Final_Hull[0,0]],[Final_Hull[-1,1],Final_Hull[0,1]], 'b-', picker=5)
+	plt.plot(Points[:,0],Points[:,1],".r")
 	plt.axis('off')
 	plt.show()
 

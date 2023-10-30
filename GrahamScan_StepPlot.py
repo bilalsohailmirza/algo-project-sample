@@ -1,54 +1,60 @@
-# Author: Rodolfo Ferro 
-# Mail: ferro@cimat.mx
-# Script: Compute the Convex Hull of a set of points using the Graham Scan (Plotting each step!)
 
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
 # Function to know if we have a CCW turn
-def RightTurn(p1, p2, p3):
+def CCW(p1, p2, p3):
 	if (p3[1]-p1[1])*(p2[0]-p1[0]) >= (p2[1]-p1[1])*(p3[0]-p1[0]):
 		return False
 	return True
 
-# Main algorithm:
-def GrahamScan(P):
-	P.sort()			# Sort the set of points
-	P = np.array(P)			# Convert the list to numpy array
+def plot_hulls(L, Points):
+	plt.clf()		# Clear plt.fig
+	plt.title("Graham Scan")
+	plt.plot(L[:,0],L[:,1], '-b', picker=5)	# Plot lines
+	plt.plot(Points[:,0],Points[:,1],".r")		# Plot points
+	plt.axis('auto')		# Manage axis
+	plt.show(block=False)	# Closing plot otherwise new window pops up
+	plt.pause(0.1)	# Mini-pause before closing plot
+
+def GrahamScan(Points):
+
+	Points.sort(key = lambda x: x[1])		# Sort the set of points according to y-coordinate
+	Points = np.array(Points)			# Convert the list to numpy array
+
 	plt.figure()			# Create a new fig
-	L_upper = [P[0], P[1]]		# Initialize the upper part
+	Upper_Hull = [Points[0], Points[1]] # Initialize the upper part
+
 	# Compute the upper part of the hull
-	for i in range(2,len(P)):
-		L_upper.append(P[i])
-		while len(L_upper) > 2 and not RightTurn(L_upper[-1],L_upper[-2],L_upper[-3]):
-			del L_upper[-2]
-		L = np.array(L_upper)
-		plt.clf()		# Clear plt.fig
-		plt.plot(L[:,0],L[:,1], 'b-', picker=5)	# Plot lines
-		plt.plot(P[:,0],P[:,1],".r")		# Plot points
-		plt.axis('off')		# No axis
-		plt.show(block=False)	# Close plot
-		plt.pause(0.0000001)	# Mini-pause before closing plot
-	L_lower = [P[-1], P[-2]]	# Initialize the lower part
+	for i in range(2,len(Points)):
+		Upper_Hull.append(Points[i])
+		while len(Upper_Hull) > 2 and not CCW(Upper_Hull[-1],Upper_Hull[-2],Upper_Hull[-3]):
+			del Upper_Hull[-2]
+		Final_Hull = np.array(Upper_Hull)
+
+		plot_hulls(Final_Hull, Points)
+		
+
+	Lower_Hull = [Points[-1], Points[-2]]	# Initialize the lower part
+
 	# Compute the lower part of the hull
-	for i in range(len(P)-3,-1,-1):
-		L_lower.append(P[i])
-		while len(L_lower) > 2 and not RightTurn(L_lower[-1],L_lower[-2],L_lower[-3]):
-			del L_lower[-2]
-		L = np.array(L_upper + L_lower)
-		plt.clf()               # Clear plt.fig
-		plt.plot(L[:,0],L[:,1], 'b-', picker=5)   # Plot lines
-		plt.plot(P[:,0],P[:,1],".r")              # Plot points
-		plt.axis('off')         # No axis
-		plt.show(block=False)   # Close plot
-		plt.pause(0.0000001)	# Mini-pause befor closing plot
-	del L_lower[0]
-	del L_lower[-1]
-	L = L_upper + L_lower 		# Build the full hull
-	plt.axis('off')
+	for i in range(len(Points)-3,-1,-1):
+		Lower_Hull.append(Points[i])
+		while len(Lower_Hull) > 2 and not CCW(Lower_Hull[-1],Lower_Hull[-2],Lower_Hull[-3]):
+			del Lower_Hull[-2]
+		Final_Hull = np.array(Upper_Hull + Lower_Hull)
+
+		plot_hulls(Final_Hull, Points)
+		
+	del Lower_Hull[0]
+	del Lower_Hull[-1]
+
+	Final_Hull = Upper_Hull + Lower_Hull 		# Build the full hull
+	plt.title("Graham Scan")
+	plt.axis('auto')
 	plt.show()
-	return np.array(L)
+	return np.array(Final_Hull)
 
 def main():
 	try:
@@ -56,9 +62,16 @@ def main():
 	except:
 		N = int(input("Introduce N: "))
 		
-	# By default we build a random set of N points with coordinates in [-300,300)x[-300,300):
-	P = [(np.random.randint(-300,300),np.random.randint(-300,300)) for i in range(N)]
-	L = GrahamScan(P)
+	Points = [(np.random.randint(-300,300),np.random.randint(-300,300)) for i in range(N)]
+
+	print("Generated Points: ")
+	for p in Points:
+		print(p)
+
+	Final_Hull = GrahamScan(Points)
+
+	print('Obtained Final Hull')
+	print(Final_Hull)
 
 if __name__ == '__main__':
   main()
