@@ -1,49 +1,67 @@
+import time
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import time
 
 
-# Use cross product to determine whe fiber a point lies above or below a line.
-#   Ma fib: https://ma fib.stackexchange.com/a/274728
-#   English: "above" means  fibat looking from point a towards point b,
-#                fibe point p lies to  fibe left of  fibe line.
-def is_above(p, a, b):
-    return np.cross(p - a, b - a) < 0
+def CCW(p1, p2, p3):
+    if (p3[1]-p1[1])*(p2[0]-p1[0]) >= (p2[1]-p1[1])*(p3[0]-p1[0]):
+        return False
+    
+    return True
 
 
-points = []
-start = time.time()
 
+def BruteForce(Points):  # Main method which forms convex hull
 
-def initPoints(n):
-    for i in range(0, n):  # Plots points on table
-        points.append([np.random.randint(1, 100), np.random.randint(1, 100)])  # Change bounds to increase or decrease
-        # (x,y) acceptable range
-        plt.plot(points[i][0], points[i][1], '.r')
+    x_values = []
+    y_values = []
 
-
-def convexHull(arr):  # Main method which forms convex hull
-    for i in range(0, len(arr)):
-        for j in range(1, len(arr)):
+    for i in range(0, len(Points)):
+        for j in range(1, len(Points)):
             if j != i:
                 above = 0
                 below = 0
-                for k in range(0, len(arr)):
+                for k in range(0, len(Points)):
                     if k != i and k != j:
-                        if is_above(np.array(arr[k]), np.array(arr[i]), np.array(arr[j])):
+                        
+                        if CCW(np.array(Points[k]), np.array(Points[i]), np.array(Points[j])):
                             above = above + 1
 
                         else:
                             below = below + 1
 
-                    if k == len(arr) - 1 and ((below == 0) or (above == 0)):
-                        x_values = [arr[i][0], arr[j][0]]
-                        y_values = [arr[i][1], arr[j][1]]
-                        plt.plot(x_values, y_values, '-b')
+                    if k == len(Points) - 1 and ((below == 0) or (above == 0)):
+                        
+                        x_values = [Points[i][0], Points[j][0]]
+                        y_values = [Points[i][1], Points[j][1]]
+                        plt.title("Brute Force")
+                        plt.plot(x_values, y_values, '-r')
+                        plt.show(block=False)
+                        plt.pause(0.01)
 
 
-initPoints(45)  # Change value to choose how many points on table
-convexHull(points)
+def main():
+    
+    try:
+        N = int(sys.argv[1])
+    except:
+        N = int(input("Introduce N: "))
+        
+    Points = [(np.random.randint(-1000,1000),np.random.randint(-1000,1000)) for i in range(N)]
 
-print("--- %0.3f ms ---" % ((time.time() - start) * 1000))
-plt.show()
+
+    print("Generated Points: ")
+    for p in Points:
+        print(p)
+        plt.plot(p[0], p[1], '.b')
+    
+    BruteForce(Points)
+    
+
+    plt.show()
+
+if __name__ == '__main__':
+
+    start = time.time()
+    main()
